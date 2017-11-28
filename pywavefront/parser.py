@@ -33,7 +33,10 @@
 # ----------------------------------------------------------------------------
 
 import os
-import pyglet
+
+
+__all__ = ['Parser']
+
 
 class Parser(object):
     """This defines a generalized parse dispatcher; all parse functions

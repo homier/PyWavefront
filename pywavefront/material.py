@@ -32,10 +32,10 @@
 # POSSIBILITY OF SUCH DAMAGE.
 # ----------------------------------------------------------------------------
 
-from pyglet.gl import *
+from .parser import Parser
 
-import pywavefront.parser as parser
-import pywavefront.texture as texture
+
+__all__ = ['Material', 'MaterialParser']
 
 
 class Material(object):
@@ -80,36 +80,11 @@ class Material(object):
     def set_emissive(self, values=[]):
         self.emissive = self.pad_light(values)
 
-    def set_texture(self, path):
-        self.texture = texture.Texture(path)
-
     def unset_texture(self):
         self.texture = None
 
-    def gl_light(self, lighting):
-        """Return a GLfloat with length 4, containing the 4 lighting values."""
-        return (GLfloat * 4)(*(lighting))
 
-    def draw(self, face=GL_FRONT_AND_BACK):
-        if self.texture:
-            self.texture.draw()
-        else:
-            glDisable(GL_TEXTURE_2D)
-
-        glMaterialfv(face, GL_DIFFUSE, self.gl_light(self.diffuse))
-        glMaterialfv(face, GL_AMBIENT, self.gl_light(self.ambient))
-        glMaterialfv(face, GL_SPECULAR, self.gl_light(self.specular))
-        glMaterialfv(face, GL_EMISSION, self.gl_light(self.emissive))
-        glMaterialf(face, GL_SHININESS, self.shininess)
-
-        if self.gl_floats is None:
-            self.gl_floats = (GLfloat * len(self.vertices))(*self.vertices)
-            self.triangle_count = len(self.vertices) / 8
-        glInterleavedArrays(GL_T2F_N3F_V3F, 0, self.gl_floats)
-        glDrawArrays(GL_TRIANGLES, 0, int(self.triangle_count))
-
-
-class MaterialParser(parser.Parser):
+class MaterialParser(Parser):
     """Object to parse lines of a materials definition file."""
 
     def __init__(self, file_path):
@@ -141,10 +116,6 @@ class MaterialParser(parser.Parser):
     def parse_d(self, args):
         [d] = args
         self.this_material.set_alpha(d)
-
-    def parse_map_Kd(self, args):
-        [Kd] = args
-        self.this_material.set_texture(Kd)
 
     def parse_Ni(self, args):
         # unimplemented
